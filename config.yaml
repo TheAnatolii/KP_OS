@@ -1,6 +1,4 @@
 Job1: [Job2]
 Job2: [Job3]
-Job3: [Job4]
+Job3: []
 Job4: []
-Job5: []
-Job6: []

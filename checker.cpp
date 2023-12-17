@@ -39,56 +39,6 @@ std::unordered_set<int> getStartJobs(const std::unordered_map<std::string, std::
     return startJobs;
 }
 
-// std::unordered_set<int> getEndJobs(const std::unordered_map<std::string, std::unordered_set<std::string>> &graph, bool &hasEndJobs)
-// {
-//     std::unordered_set<int> endJobs;
-
-//     std::unordered_set<std::string> allNodes;
-//     std::unordered_set<std::string> dependentNodes;
-
-//     for (const auto &node : graph)
-//     {
-//         allNodes.insert(node.first);
-//         for (const auto &dependency : node.second)
-//         {
-//             dependentNodes.insert(dependency);
-//         }
-//     }
-
-//     for (const auto &node : graph)
-//     {
-//         for (const auto &neighbor : node.second)
-//         {
-//             dependentNodes.insert(neighbor); // Заполняем dependentNodes зависимостями других узлов
-//             allNodes.insert(node.first);     // Заполняем allNodes текущими узлами
-//         }
-//     }
-
-//     // Отфильтруем endJobs для получения корректных завершающих узлов
-//     for (const auto &node : graph)
-//     {
-//         dependentNodes.erase(node.first);                             // Удаляем текущий узел из dependentNodes
-//         dependentNodes.erase(node.second.begin(), node.second.end()); // Удаляем зависимости текущего узла из dependentNodes
-//     }
-
-//     for (const auto &node : graph)
-//     {
-//         // Проверяем, является ли node.first числом перед преобразованием в int
-//         if (std::all_of(node.first.begin(), node.first.end(), ::isdigit))
-//         {
-//             int converted = std::stoi(node.first);
-//             if (dependentNodes.find(node.first) == dependentNodes.end() && allNodes.find(node.first) != allNodes.end())
-//             {
-//                 endJobs.insert(converted);
-//             }
-//         }
-//     }
-
-//     hasEndJobs = !endJobs.empty(); // Обновление значения hasEndJobs
-
-//     return endJobs;
-// }
-
 // Функция для проверки наличия циклов в DAG с использованием алгоритма поиска в глубину (DFS)
 bool hasCycle(const std::unordered_map<std::string, std::unordered_set<std::string>> &graph,
               std::string node,
