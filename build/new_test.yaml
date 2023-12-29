@@ -15,17 +15,19 @@ jobs:
 
   - name: 4
     command: "echo 'Running job4'"
+    mutex: "mt"
     depends_on:
       - 1
       - 2
 
   - name: 5
     command: "/Users/anatolii/Desktop/OOP_MAI/OOP_hometasks/MAI_OOP_hometask_5/build/tests"
+    mutex: "mt"
     depends_on:
       - 3
 
   - name: 6
-    command: "ls"
+    command: "/Users/anatolii/Desktop/Oper_Syst/kp/build/error"
     depends_on:
       - 4
       - 5

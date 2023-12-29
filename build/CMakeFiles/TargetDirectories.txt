@@ -1,4 +1,6 @@
 /Users/anatolii/Desktop/Oper_Syst/kp/build/CMakeFiles/check.dir
+/Users/anatolii/Desktop/Oper_Syst/kp/build/CMakeFiles/error.dir
+/Users/anatolii/Desktop/Oper_Syst/kp/build/CMakeFiles/timer.dir
 /Users/anatolii/Desktop/Oper_Syst/kp/build/CMakeFiles/edit_cache.dir
 /Users/anatolii/Desktop/Oper_Syst/kp/build/CMakeFiles/rebuild_cache.dir
 /Users/anatolii/Desktop/Oper_Syst/kp/build/yaml-cpp-master/CMakeFiles/Experimental.dir

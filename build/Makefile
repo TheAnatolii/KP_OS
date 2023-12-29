@@ -131,6 +131,32 @@ check/fast:
 .PHONY : check/fast
 
 #=============================================================================
+# Target rules for targets named error
+
+# Build rule for target.
+error: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 error
+.PHONY : error
+
+# fast build rule for target.
+error/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/error.dir/build.make CMakeFiles/error.dir/build
+.PHONY : error/fast
+
+#=============================================================================
+# Target rules for targets named timer
+
+# Build rule for target.
+timer: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 timer
+.PHONY : timer
+
+# fast build rule for target.
+timer/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/timer.dir/build.make CMakeFiles/timer.dir/build
+.PHONY : timer/fast
+
+#=============================================================================
 # Target rules for targets named Experimental
 
 # Build rule for target.
@@ -570,6 +596,54 @@ checker.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/check.dir/build.make CMakeFiles/check.dir/checker.cpp.s
 .PHONY : checker.cpp.s
 
+error.o: error.cpp.o
+.PHONY : error.o
+
+# target to build an object file
+error.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/error.dir/build.make CMakeFiles/error.dir/error.cpp.o
+.PHONY : error.cpp.o
+
+error.i: error.cpp.i
+.PHONY : error.i
+
+# target to preprocess a source file
+error.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/error.dir/build.make CMakeFiles/error.dir/error.cpp.i
+.PHONY : error.cpp.i
+
+error.s: error.cpp.s
+.PHONY : error.s
+
+# target to generate assembly for a file
+error.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/error.dir/build.make CMakeFiles/error.dir/error.cpp.s
+.PHONY : error.cpp.s
+
+timer_job.o: timer_job.cpp.o
+.PHONY : timer_job.o
+
+# target to build an object file
+timer_job.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/timer.dir/build.make CMakeFiles/timer.dir/timer_job.cpp.o
+.PHONY : timer_job.cpp.o
+
+timer_job.i: timer_job.cpp.i
+.PHONY : timer_job.i
+
+# target to preprocess a source file
+timer_job.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/timer.dir/build.make CMakeFiles/timer.dir/timer_job.cpp.i
+.PHONY : timer_job.cpp.i
+
+timer_job.s: timer_job.cpp.s
+.PHONY : timer_job.s
+
+# target to generate assembly for a file
+timer_job.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/timer.dir/build.make CMakeFiles/timer.dir/timer_job.cpp.s
+.PHONY : timer_job.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -607,6 +681,8 @@ help:
 	@echo "... NightlyTest"
 	@echo "... NightlyUpdate"
 	@echo "... check"
+	@echo "... error"
+	@echo "... timer"
 	@echo "... yaml-cpp"
 	@echo "... yaml-cpp-parse"
 	@echo "... yaml-cpp-read"
@@ -614,6 +690,12 @@ help:
 	@echo "... checker.o"
 	@echo "... checker.i"
 	@echo "... checker.s"
+	@echo "... error.o"
+	@echo "... error.i"
+	@echo "... error.s"
+	@echo "... timer_job.o"
+	@echo "... timer_job.i"
+	@echo "... timer_job.s"
 .PHONY : help
 
 

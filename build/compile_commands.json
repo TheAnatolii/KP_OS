@@ -6,6 +6,18 @@
   "output": "CMakeFiles/check.dir/checker.cpp.o"
 },
 {
+  "directory": "/Users/anatolii/Desktop/Oper_Syst/kp/build",
+  "command": "/usr/bin/clang++   -g -std=gnu++17 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk -o CMakeFiles/error.dir/error.cpp.o -c /Users/anatolii/Desktop/Oper_Syst/kp/error.cpp",
+  "file": "/Users/anatolii/Desktop/Oper_Syst/kp/error.cpp",
+  "output": "CMakeFiles/error.dir/error.cpp.o"
+},
+{
+  "directory": "/Users/anatolii/Desktop/Oper_Syst/kp/build",
+  "command": "/usr/bin/clang++   -g -std=gnu++17 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk -o CMakeFiles/timer.dir/timer_job.cpp.o -c /Users/anatolii/Desktop/Oper_Syst/kp/timer_job.cpp",
+  "file": "/Users/anatolii/Desktop/Oper_Syst/kp/timer_job.cpp",
+  "output": "CMakeFiles/timer.dir/timer_job.cpp.o"
+},
+{
   "directory": "/Users/anatolii/Desktop/Oper_Syst/kp/build/yaml-cpp-master",
   "command": "/usr/bin/clang++ -DYAML_CPP_STATIC_DEFINE -I/Users/anatolii/Desktop/Oper_Syst/kp/yaml-cpp-master/include -I/Users/anatolii/Desktop/Oper_Syst/kp/yaml-cpp-master/src -g -std=gnu++17 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk -fPIC -o CMakeFiles/yaml-cpp.dir/src/contrib/graphbuilder.cpp.o -c /Users/anatolii/Desktop/Oper_Syst/kp/yaml-cpp-master/src/contrib/graphbuilder.cpp",
   "file": "/Users/anatolii/Desktop/Oper_Syst/kp/yaml-cpp-master/src/contrib/graphbuilder.cpp",

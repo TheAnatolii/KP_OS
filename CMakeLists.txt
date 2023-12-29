@@ -8,3 +8,6 @@ add_subdirectory(yaml-cpp-master)
 
 add_executable(check checker.cpp)
 target_link_libraries(check yaml-cpp)
+
+add_executable(error error.cpp)
+add_executable(timer timer_job.cpp)
