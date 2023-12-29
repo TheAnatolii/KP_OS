@@ -4,170 +4,239 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <queue>
+#include <vector>
+#include <sys/wait.h>
+#include <thread>
+#include <mutex>
+#include <string>
 
-std::unordered_set<int> getStartJobs(const std::unordered_map<std::string, std::unordered_set<std::string>> &graph, bool &hasStartJobs)
+// структура для джоба
+struct Job
 {
-    std::unordered_set<int> startJobs;
+    int name;
+    std::string command;
+    std::vector<int> depends_on;
+    std::string mutex_name;
+};
 
-    std::unordered_set<std::string> allNodes;
-    std::unordered_set<std::string> dependentNodes;
+// достаём инфу, просто собираем джобы в один вектор
+std::vector<Job> parser(std::string filename)
+{
+    YAML::Node config = YAML::LoadFile("new_test.yaml");
 
-    for (const auto &node : graph)
+    std::vector<Job> jobs;
+
+    // Парсинг job'ов
+    for (const auto &jobNode : config["jobs"])
     {
-        allNodes.insert(node.first);
-        for (const auto &dependency : node.second)
-        {
-            dependentNodes.insert(dependency);
-        }
-    }
+        Job job;
+        job.name = jobNode["name"].as<int>();
+        job.command = jobNode["command"].as<std::string>();
+        if (jobNode["mutex"])
+            job.mutex_name = jobNode["mutex"].as<std::string>();
 
-    for (const auto &node : graph)
-    {
-        // Проверяем, является ли node.first числом перед преобразованием в int
-        if (std::all_of(node.first.begin(), node.first.end(), ::isdigit))
+        // Парсинг зависимостей
+        const auto dependsOnNode = jobNode["depends_on"];
+        if (dependsOnNode.IsSequence())
         {
-            int converted = std::stoi(node.first);
-            if (dependentNodes.find(node.first) == dependentNodes.end() && allNodes.find(node.first) != allNodes.end())
+            for (const auto &dependency : dependsOnNode)
             {
-                startJobs.insert(converted);
+                job.depends_on.push_back(dependency.as<int>());
             }
         }
+
+        jobs.push_back(job);
     }
-
-    hasStartJobs = !startJobs.empty(); // Обновление значения hasStartJobs
-
-    return startJobs;
+    return jobs;
 }
 
-// Функция для проверки наличия циклов в DAG с использованием алгоритма поиска в глубину (DFS)
-bool hasCycle(const std::unordered_map<std::string, std::unordered_set<std::string>> &graph,
-              std::string node,
-              std::unordered_set<std::string> &visited,
-              std::unordered_set<std::string> &recStack)
+// создаём дерево, которое показывает переходы от данной вершины к её родителю(ям)
+std::vector<std::unordered_set<int>> create_tree_from_up_to_down(const std::vector<Job> &jobs, std::vector<int> &start_jobs)
 {
-    if (graph.find(node) != graph.end())
-    { // Проверка наличия ключа в словаре
-        if (visited.find(node) == visited.end())
-        {
-            visited.insert(node);
-            recStack.insert(node);
+    std::vector<std::unordered_set<int>> tree(jobs.size());
 
-            for (const auto &neighbor : graph.at(node))
-            {
-                if (visited.find(neighbor) == visited.end() && hasCycle(graph, neighbor, visited, recStack))
-                {
-                    return true;
-                }
-                else if (recStack.find(neighbor) != recStack.end())
-                {
-                    return true;
-                }
-            }
-        }
-        recStack.erase(node);
-    }
-    return false;
-}
-
-void DFS(const std::unordered_map<std::string, std::unordered_set<std::string>> &graph,
-         const std::string &node,
-         std::unordered_set<std::string> &visited)
-{
-    visited.insert(node);
-    auto it = graph.find(node);
-    if (it != graph.end())
+    for (auto &job : jobs)
     {
-        for (const auto &neighbor : graph.at(node))
+        if (job.depends_on.empty())
         {
-            if (visited.find(neighbor) == visited.end())
-            {
-                DFS(graph, neighbor, visited);
-            }
+            start_jobs.push_back(job.name);
+        }
+
+        for (auto &dependence : job.depends_on)
+        {
+            tree[job.name - 1].insert(dependence);
+        }
+    }
+    return tree;
+}
+
+// находим конечные джобы
+void find_end_jobs(const std::vector<std::unordered_set<int>> &tree, std::vector<int> &end_jobs)
+{
+    std::vector<bool> is_top(tree.size(), true);
+
+    for (const auto &children : tree)
+    {
+        for (auto &child : children)
+        {
+            is_top[child - 1] = false;
+        }
+    }
+
+    for (size_t i = 0; i < is_top.size(); ++i)
+    {
+        if (is_top[i])
+        {
+            end_jobs.push_back(i + 1);
         }
     }
 }
 
-bool hasSingleConnectedComponent(const std::unordered_map<std::string, std::unordered_set<std::string>> &graph)
+// находим циклы
+bool find_cycle(std::vector<std::unordered_set<int>> &tree, int u, std::vector<int> &visited)
 {
-    if (graph.empty())
+    if (visited[u] == 1)
     {
         return true;
     }
+    if (visited[u] == 2)
+    {
+        return false;
+    }
+    visited[u] = 1;
+    bool res = false;
+    for (int v : tree[u])
+    {
+        res |= find_cycle(tree, v - 1, visited);
+    }
+    visited[u] = 2;
+    return res;
+}
 
-    std::unordered_set<std::string> visited;
+// прогоняем функцию нахождения циклов для каждой вершины дерева
+bool check_cycle(std::vector<std::unordered_set<int>> &tree, std::vector<int> &starts)
+{
+    std::vector<int> visited(tree.size());
+    bool res = true;
+    for (int start : starts)
+    {
+        res &= !find_cycle(tree, start - 1, visited);
+        // for (auto &children : visited)
+        // {
+        //     std::cout << children << " ";
+        // }
+        // std::cout << std::endl;
+    }
+    return res;
+}
 
-    // Выбираем первый узел и проверяем связанность
-    const auto &firstNode = graph.begin()->first;
-    DFS(graph, firstNode, visited);
+// обход дерева в глубину и отметка посещённых вершин
+void dfs(std::vector<std::unordered_set<int>> &tree, int u, std::vector<int> &visited)
+{
+    if (visited[u] == 1)
+    {
+        return;
+    }
+    visited[u] = 1;
+    bool res = true;
+    for (int v : tree[u])
+    {
+        dfs(tree, v - 1, visited);
+    }
+}
 
-    // Проверяем, что все узлы были посещены (одна компонента связности)
-    return visited.size() == graph.size();
+/* ищет компоненты отделенные от графа
+ * @return true, если текущий компонент не связан с графом, false, если связь есть.
+ */
+bool find_components(std::vector<std::unordered_set<int>> &tree, int u, std::vector<int> &visited)
+{
+    if (visited[u] == 1)
+    {
+        return false;
+    }
+    if (tree[u].empty())
+    {
+        return true;
+    }
+    visited[u] = 1;
+    bool res = true;
+    for (int v : tree[u])
+    {
+        res &= find_components(tree, v - 1, visited);
+    }
+    return res;
+}
+
+// проверка графа на одну компоненту связности
+bool check_connectivity(std::vector<std::unordered_set<int>> &tree, std::vector<int> &starts)
+{
+    std::vector<int> visited(tree.size());
+    bool res = true;
+    size_t i = 0;
+    dfs(tree, starts[i++] - 1, visited);
+    for (; i < starts.size(); i++)
+    {
+        res &= !find_components(tree, starts[i] - 1, visited);
+    }
+    return res;
 }
 
 int main()
 {
-    // Загрузка конфигурационного файла в формате YAML
-    std::ifstream fin("config.yaml");
-    YAML::Node config = YAML::Load(fin);
-    fin.close();
 
-    // Парсинг YAML и построение графа
-    std::unordered_map<std::string, std::unordered_set<std::string>> graph;
+    std::vector<Job> jobs = parser("new_test.yaml"); // читаем файл
 
-    for (const auto &node : config)
+    std::vector<int> start_jobs, end_jobs;
+    // создаём дерево, и сразу находим начальные job'ы
+    std::vector<std::unordered_set<int>> tree = create_tree_from_up_to_down(jobs, start_jobs);
+
+    // находим конечные job'ы
+    find_end_jobs(tree, end_jobs);
+
+    // проверяем граф по заданию
+    if (start_jobs.empty())
     {
-        std::string job = node.first.as<std::string>();
-        for (const auto &dependency : node.second)
+        std::cerr << "Error: Отсутствуют начальные джобы" << std::endl;
+        return -1;
+    }
+    if (end_jobs.empty())
+    {
+        std::cerr << "Error: Отсутствуют завершающие джобы" << std::endl;
+        return -1;
+    }
+    if (!check_cycle(tree, end_jobs))
+    {
+        std::cerr << "Error: В графе есть циклы" << std::endl;
+        return -1;
+    }
+    if (!check_connectivity(tree, end_jobs))
+    {
+        std::cerr << "Error: В графе больше одной компоненты связности" << std::endl;
+        return -1;
+    }
+
+    // читаем мьютексы, указанные у джобов
+    std::unordered_map<std::string, bool> mutex_vals;
+    std::unordered_map<int, std::string> mutex_names;
+
+    for (auto job : jobs)
+    {
+        std::string mutex_name = job.mutex_name;
+        if (!mutex_name.empty())
         {
-            std::string dependentJob = dependency.as<std::string>();
-            graph[job].insert(dependentJob);
+            mutex_names[job.name] = mutex_name;
+            mutex_vals[mutex_name] = true;
         }
     }
 
-    // Проверка наличия циклов в графе
-    std::unordered_set<std::string> visited, recStack;
-    bool hasCycles = false;
+    // for (auto &mutex : mutex_names)
+    // {
+    //     std::cout << mutex.first << " " << mutex.second << std::endl;
+    // }
 
-    for (const auto &node : graph)
-    {
-        if (hasCycle(graph, node.first, visited, recStack))
-        {
-            hasCycles = true;
-            break;
-        }
-    }
-
-    // Проверка наличия только одной компоненты связанности
-    bool singleComponent = hasSingleConnectedComponent(graph);
-
-    // Проверка наличия стартовых и завершающих джобов
-    bool hasStartJobs = false;
-    bool hasEndJobs = false;
-    std::unordered_set<int> startJobs = getStartJobs(graph, hasStartJobs);
-    // std::unordered_set<int> endJobs = getEndJobs(graph, hasEndJobs);
-
-    // Вывод результатов проверки
-    if (hasCycles)
-    {
-        std::cout << "Граф содержит циклы.\n";
-    }
-    else if (!singleComponent)
-    {
-        std::cout << "Граф содержит несколько компонент связанности.\n";
-    }
-    else if (hasStartJobs || hasEndJobs)
-    {
-        std::cout << "Отсутствуют ";
-        if (hasStartJobs)
-            std::cout << "стартовые ";
-        if (hasEndJobs)
-            std::cout << "или завершающие ";
-        std::cout << "джобы." << std::endl;
-    }
-    else
-    {
-        std::cout << "Граф корректен.\n";
-    }
+    // начинаем запуск DAG'а
+    std::queue<std::pair<int, pid_t>> waitq; // очередь задач
+    std::mutex qmtx;                         // мьютекс для доступа к waitq
 
     return 0;
 }
