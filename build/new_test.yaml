@@ -1,0 +1,35 @@
+jobs:
+  - name: 1
+    command: "echo 'Hello'"
+    mutex: "mut"
+    depends_on: []
+
+  - name: 2
+    command: "echo 'Happy New Year'"
+    mutex: "mut"
+    depends_on: []
+
+  - name: 3
+    command: "pwd"
+    depends_on: []
+
+  - name: 4
+    command: "echo 'Running job4'"
+    depends_on:
+      - 1
+      - 2
+
+  - name: 5
+    command: "echo 'Running job5'"
+    depends_on:
+      - 3
+
+  - name: 6
+    command: "echo 'Running job6'"
+    depends_on:
+      - 4
+      - 5
+
+  # - name: 7
+  #   command: "echo 'Running job5'"
+  #   depends_on: []
