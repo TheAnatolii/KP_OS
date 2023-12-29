@@ -20,12 +20,12 @@ jobs:
       - 2
 
   - name: 5
-    command: "echo 'Running job5'"
+    command: "/Users/anatolii/Desktop/OOP_MAI/OOP_hometasks/MAI_OOP_hometask_5/build/tests"
     depends_on:
       - 3
 
   - name: 6
-    command: "echo 'Running job6'"
+    command: "ls"
     depends_on:
       - 4
       - 5

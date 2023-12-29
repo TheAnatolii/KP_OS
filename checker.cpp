@@ -219,15 +219,6 @@ int main()
 
     std::vector<Job> jobs = parser("new_test.yaml"); // читаем файл
 
-    // for (auto &dependence : jobs)
-    // {
-    //     for (auto &node : dependence.depends_on)
-    //     {
-    //         std::cout << node << " ";
-    //     }
-    //     std::cout << std::endl;
-    // }
-
     std::unordered_set<int> start_jobs, end_jobs;
     // создаём дерево, и сразу находим начальные job'ы
     std::vector<std::unordered_set<int>> tree = create_tree_from_up_to_down(jobs, start_jobs);
@@ -313,7 +304,6 @@ int main()
                         if (tree[i].empty()) {
                             std::lock_guard<std::mutex> lock(qmtx);
                             start_jobs.insert(i + 1);
-                            std::cout << i + 1 << std::endl;
                         }
                     }
                 }
