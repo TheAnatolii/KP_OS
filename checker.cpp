@@ -217,7 +217,7 @@ pid_t create_job(std::string command)
 int main()
 {
 
-    std::vector<Job> jobs = parser("new_test.yaml"); // читаем файл
+    std::vector<Job> jobs = parser("/Users/anatolii/Desktop/Oper_Syst/kp/new_test.yaml"); // читаем файл
 
     std::unordered_set<int> start_jobs, end_jobs;
     // создаём дерево, и сразу находим начальные job'ы
