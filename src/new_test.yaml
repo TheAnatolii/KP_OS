@@ -27,7 +27,7 @@ jobs:
       - 3
 
   - name: 6
-    command: "/Users/anatolii/Desktop/Oper_Syst/kp/build/src/timer"
+    command: "/Users/anatolii/Desktop/Oper_Syst/kp/build/src/error"
     depends_on:
       - 4
       - 5
